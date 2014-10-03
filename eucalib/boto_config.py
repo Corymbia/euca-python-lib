@@ -23,6 +23,7 @@
 
 import boto
 import boto.provider
+import os
 
 boto_config = None
 cred_provider = None
