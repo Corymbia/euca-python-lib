@@ -16,22 +16,14 @@
 # CA 93117, USA or visit http://www.eucalyptus.com/licenses/ if you need
 # additional information or have any questions.
 
-import os
-from floppy import FloppyCredential
-import libconfig as config
-import wsclient as ws
-
-def write_certificate(cert_file, cert_pem):
-    if not os.path.exists(cert_file):
-        f_cert = open(cert_file, 'w')
-        f_cert.write(cert_pem)
-        f_cert.close()
-        os.chmod(cert_file, 0400)
-
-def download_server_certificate(cert_arn):
-    f = FloppyCredential()
-    con = ws.connect_euare()
-    cert = con.download_server_certificate(f.get_instance_pub_key(), f.get_instance_pk(), f.get_iam_pub_key(),
-                                           f.get_iam_token(), cert_arn)
-    return cert 
-
+#
+# Order matters here. We want to make sure we initialize logging before anything
+# else happens. We need to initialize the logger that boto will be using.
+#
+import httplib2
+def query_user_data():
+    resp, content = httplib2.Http().request("http://169.254.169.254/latest/user-data")
+    if resp['status'] != '200' or len(content) <= 0:
+        raise Exception('could not query the userdata')
+    #remove extra euca-.... line
+    return content

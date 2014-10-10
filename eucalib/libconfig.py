@@ -16,9 +16,6 @@
 # CA 93117, USA or visit http://www.eucalyptus.com/licenses/ if you need
 # additional information or have any questions.
 
-ACCESS_KEY_ID=None
-SECRET_KEY=None
-SECURITY_TOKEN=None
 RUN_DIRECTORY=None
 EUARE_SERVICE_URL=None
 COMPUTE_SERVICE_URL=None

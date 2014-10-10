@@ -25,22 +25,42 @@ from boto.ec2.connection import EC2Connection
 from boto.iam.connection import IAMConnection
 import time
 import M2Crypto
+import eucalib.boto_config
 from collections import Iterable
 from lxml import objectify
 
-from ssl import ServerCertificate
-import libconfig as config
+import eucalib.libconfig as libconfig
+class ServerCertificate(object):
+    def __init__(self, cert, pk):
+        self.certificate = cert
+        self.pk = pk
 
-def connect_euare(host_name=config.EUARE_SERVICE_URL, port=8773, path="services/Euare", aws_access_key_id=None,
-                  aws_secret_access_key=None, security_token=None, **kwargs):
-    return EucaEuareConnection(host_name=host_name, port=port, path=path, aws_access_key_id=aws_access_key_id,
-                               aws_secret_access_key=aws_secret_access_key, security_token=security_token,
+    def get_certificate(self):
+        return self.certificate
+
+    def get_private_key(self):
+        return self.pk
+
+access_key_id = None
+secret_key = None
+security_token = None
+def setup_keys():
+    access_key_id = eucalib.boto_config.get_access_key_id()
+    secret_key = eucalib.boto_config.get_secret_access_key()
+    security_token = eucalib.boto_config.get_security_token()
+ 
+def connect_euare(host_name=None, port=8773, path="services/Euare", aws_access_key_id=None,
+                  aws_secret_access_key=None, aws_security_token=None, **kwargs):
+    setup_keys()
+    return EucaEuareConnection(host_name=libconfig.EUARE_SERVICE_URL, port=port, path=path, aws_access_key_id=access_key_id,
+                               aws_secret_access_key=secret_key, security_token=security_token,
                                **kwargs)
 
-def connect_ec2(host_name=config.COMPUTE_SERVICE_URL, port=8773, path="services/Eucalyptus", aws_access_key_id=None,
-                aws_secret_access_key=None, security_token=None, **kwargs):
-    return EucaEC2Connection(host_name=host_name, port=port, path=path, aws_access_key_id=aws_access_key_id,
-                             aws_secret_access_key=aws_secret_access_key, security_token=security_token,
+def connect_ec2(host_name=None, port=8773, path="services/Eucalyptus", aws_access_key_id=None,
+                aws_secret_access_key=None, aws_security_token=None, **kwargs):
+    setup_keys()
+    return EucaEC2Connection(host_name=libconfig.COMPUTE_SERVICE_URL, port=port, path=path, aws_access_key_id=access_key_id,
+                             aws_secret_access_key=secret_key, security_token=security_token,
                              **kwargs)
 
 

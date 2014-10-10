@@ -22,8 +22,10 @@ import json
 import libconfig
 
 class FloppyCredential(object):
-    def __init__(self, floppy_mount_dir=libconfig.RUN_DIRECTORY+'/floppy'):
+    def __init__(self, floppy_mount_dir=None):
         #check if floppy is mounted. if not mount it
+        if not floppy_mount_dir:
+            floppy_mount_dir = libconfig.RUN_DIRECTORY+'/floppy'
         try:
             if not self.is_floppy_mounted():
                 self.mount_floppy(dir=floppy_mount_dir)
@@ -42,8 +44,11 @@ class FloppyCredential(object):
             self.instance_pk = self.instance_pk.strip().decode('base64')
             self.iam_token = cred['iam_token']
             self.iam_token = self.iam_token.strip()
-            self.euca_cert = cred['euca_pub_key']
-            self.euca_cert = self.euca_cert.strip().decode('base64')
+            try:
+                self.euca_cert = cred['euca_pub_key']
+                self.euca_cert = self.euca_cert.strip().decode('base64')
+            except Exception, err:
+                pass
         except IOError, err:
             raise Exception('failed to read credential file on floppy: ' + str(err))
         except Exception, err:
@@ -61,14 +66,14 @@ class FloppyCredential(object):
         if not os.path.exists(dir):
             os.makedirs(dir)
         cmd_line = 'sudo /bin/mount %s %s' % (dev, dir)
-        if subprocess.call(cmd_line, shell=True) == 0:
+        if subprocess.call(cmd_line, shell=True) != 0:
             raise Exception('failed to mount floppy')
 
     def unmount_floppy(self, dir=None):
         if not os.path.exists(dir):
             return
         cmd_line = 'sudo /bin/umount %s' % dir
-        if subprocess.call(cmd_line, shell=True) == 0:
+        if subprocess.call(cmd_line, shell=True) != 0:
             raise Exception('failed to unmount floppy')
 
     def get_iam_pub_key(self):
